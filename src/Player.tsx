@@ -50,10 +50,13 @@ export default function Player({ onLockChange }: { onLockChange?: (locked: boole
     camera.position.set(spawn.x, PLAYER_HEIGHT, spawn.z)
     camera.rotation.set(0, Math.PI, 0) // face down the long corridor
     velocityY.current = 0
+    live.pausedTotal = 0
+    live.pausedAt = performance.now() // the run clock starts on first lock
     const request = gl.domElement.requestPointerLock() as Promise<void> | undefined
     request?.catch?.(() => {})
     return () => {
       live.locked = false
+      live.pausedAt = null
       document.exitPointerLock()
     }
   }, [camera, gl])
@@ -128,10 +131,15 @@ export default function Player({ onLockChange }: { onLockChange?: (locked: boole
       pointerSpeed={MOUSE_SENS / 0.002} // three applies 0.002 rad/px internally; scale so MOUSE_SENS is the real sensitivity
       onLock={() => {
         live.locked = true
+        if (live.pausedAt !== null) {
+          live.pausedTotal += performance.now() - live.pausedAt
+          live.pausedAt = null
+        }
         onLockChange?.(true)
       }}
       onUnlock={() => {
         live.locked = false
+        live.pausedAt = performance.now()
         onLockChange?.(false)
       }}
     />

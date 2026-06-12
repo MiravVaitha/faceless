@@ -20,3 +20,7 @@ export const WALL_HEIGHT = 4 // meters — tall enough that you can't see over
 export const BOT_HEIGHT = 1.9 // sprite height, meters — person-sized
 export const BOT_RADIUS = 0.4 // bot collision half-width, meters
 export const BOT_FLOAT = 0.12 // hover above the floor, meters
+
+export const JUMPSCARE_SNAP = 0.06 // seconds to close ~63% of the rush — smaller = more violent
+export const JUMPSCARE_SCALE = 2.4 // how big the face grows during the rush
+export const GAMEOVER_DELAY = 900 // ms between the catch and the game-over panel

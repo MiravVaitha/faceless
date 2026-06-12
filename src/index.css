@@ -1,5 +1,14 @@
 @import 'tailwindcss';
 
+@keyframes jumpflash {
+  from {
+    opacity: 0.85;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 html,
 body,
 #root {

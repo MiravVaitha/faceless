@@ -3,7 +3,17 @@ import { useFrame } from '@react-three/fiber'
 import { Billboard, useTexture } from '@react-three/drei'
 import { DoubleSide, Group, SRGBColorSpace, Vector3 } from 'three'
 import { slideMove } from './collision'
-import { BOT_FLOAT, BOT_HEIGHT, BOT_RADIUS, BOT_SPEED, PATH_REFRESH, WAYPOINT_RADIUS } from './config'
+import {
+  BOT_FLOAT,
+  BOT_HEIGHT,
+  BOT_RADIUS,
+  BOT_SPEED,
+  CATCH_DISTANCE,
+  JUMPSCARE_SCALE,
+  JUMPSCARE_SNAP,
+  PATH_REFRESH,
+  WAYPOINT_RADIUS,
+} from './config'
 import { live } from './live'
 import { BOT_SPAWN, cellToWorld, worldToCell } from './map'
 import { type Cell, findPath } from './pathfinding'
@@ -26,6 +36,7 @@ export default function Bot() {
   const path = useRef<Cell[]>([])
   const pathIdx = useRef(0)
   const repathIn = useRef(0)
+  const scareT = useRef(0)
 
   // every new run puts the bot back at the far corner
   useEffect(() => {
@@ -33,8 +44,10 @@ export default function Bot() {
     path.current = []
     pathIdx.current = 0
     repathIn.current = 0
+    scareT.current = 0
     live.botDistance = Infinity
     group.current?.position.copy(pos.current)
+    group.current?.scale.setScalar(1)
   }, [runId])
 
   useFrame(({ camera }, delta) => {
@@ -42,8 +55,25 @@ export default function Bot() {
     if (!g) return
     const dt = Math.min(delta, 0.1)
     const p = pos.current
+    const phase = useGame.getState().phase
 
-    if (useGame.getState().phase === 'playing' && live.locked) {
+    if (phase === 'caught') {
+      // jumpscare: rush a point right in front of the camera and blow up the
+      // sprite — exponential approach so it slams in regardless of distance
+      scareT.current += dt
+      camera.getWorldDirection(_dir)
+      _target.copy(camera.position).addScaledVector(_dir, 1.0)
+      const k = 1 - Math.exp(-dt / JUMPSCARE_SNAP)
+      p.lerp(_target, k)
+      g.scale.setScalar(g.scale.x + (JUMPSCARE_SCALE - g.scale.x) * k)
+      g.position.copy(p)
+      // dying tremor
+      g.position.x += Math.sin(scareT.current * 67) * 0.05
+      g.position.y += Math.sin(scareT.current * 53) * 0.04
+      return
+    }
+
+    if (phase === 'playing' && live.locked) {
       // Recompute the route on a timer, not every frame — the staleness is
       // part of the nextbot feel (it overshoots corners you just turned).
       repathIn.current -= dt
@@ -82,6 +112,10 @@ export default function Bot() {
 
     g.position.copy(p)
     live.botDistance = Math.hypot(camera.position.x - p.x, camera.position.z - p.z)
+
+    if (phase === 'playing' && live.locked && live.botDistance < CATCH_DISTANCE) {
+      useGame.getState().caught()
+    }
   })
 
   // size the sprite like a person regardless of the photo's shape

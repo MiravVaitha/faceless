@@ -1,6 +1,8 @@
 import { Suspense, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import Bot from './Bot'
+import GameOver from './GameOver'
+import Hud from './Hud'
 import Maze from './Maze'
 import Menu from './Menu'
 import Player from './Player'
@@ -38,6 +40,8 @@ export default function App() {
 
       {phase === 'menu' && <Menu />}
 
+      {phase === 'playing' && <Hud />}
+
       {phase === 'playing' && !locked && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div className="rounded-lg bg-black/70 px-8 py-6 text-center font-mono text-white">
@@ -45,6 +49,13 @@ export default function App() {
             <p className="mt-3 text-sm text-white/60">WASD move &middot; Shift sprint &middot; Esc release mouse</p>
           </div>
         </div>
+      )}
+
+      {phase === 'caught' && (
+        <>
+          <div className="pointer-events-none absolute inset-0 animate-[jumpflash_0.7s_ease-out_forwards] bg-red-700" />
+          <GameOver />
+        </>
       )}
     </div>
   )

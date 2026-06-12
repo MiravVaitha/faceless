@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { useTexture } from '@react-three/drei'
+import { live } from './live'
 import { placeholderFaceUrl } from './placeholderFace'
 
 export type GamePhase = 'menu' | 'playing' | 'caught'
@@ -52,7 +53,7 @@ export const useGame = create<GameState>((set, get) => ({
   caught: () => {
     const s = get()
     if (s.phase !== 'playing') return
-    const survivedMs = performance.now() - s.startedAt
+    const survivedMs = runElapsedMs()
     const bestMs = Math.max(s.bestMs ?? 0, survivedMs)
     localStorage.setItem(BEST_KEY, String(Math.round(bestMs)))
     set({ phase: 'caught', survivedMs, bestMs })
@@ -60,3 +61,12 @@ export const useGame = create<GameState>((set, get) => ({
 
   toMenu: () => set({ phase: 'menu' }),
 }))
+
+/** Run time excluding pointer-unlocked spans (the game is frozen then). */
+export function runElapsedMs(): number {
+  const { phase, startedAt } = useGame.getState()
+  if (phase === 'menu') return 0
+  const now = performance.now()
+  const paused = live.pausedTotal + (live.pausedAt !== null ? now - live.pausedAt : 0)
+  return Math.max(0, now - startedAt - paused)
+}

@@ -1,10 +1,13 @@
 import { useEffect, useRef, type ComponentRef } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import { PointerLockControls } from '@react-three/drei'
 import { Euler, Vector3 } from 'three'
 import { slideMove } from './collision'
 import { GRAVITY, MOUSE_SENS, PLAYER_HEIGHT, PLAYER_RADIUS, PLAYER_SPRINT, PLAYER_WALK } from './config'
 import { live } from './live'
+import { PLAYER_SPAWN, cellToWorld } from './map'
+
+const spawn = cellToWorld(PLAYER_SPAWN.col, PLAYER_SPAWN.row)
 
 type KeyAction = 'forward' | 'back' | 'left' | 'right' | 'sprint'
 
@@ -37,6 +40,23 @@ export default function Player({ onLockChange }: { onLockChange?: (locked: boole
     sprint: false,
   })
   const velocityY = useRef(0)
+  const camera = useThree((s) => s.camera)
+  const gl = useThree((s) => s.gl)
+
+  // Player mounts when a run starts: reset to spawn and grab the pointer while
+  // the Start click's user gesture is still fresh. If the browser refuses
+  // (e.g. Esc re-lock cooldown), the click-to-enter hint stays up instead.
+  useEffect(() => {
+    camera.position.set(spawn.x, PLAYER_HEIGHT, spawn.z)
+    camera.rotation.set(0, Math.PI, 0) // face down the long corridor
+    velocityY.current = 0
+    const request = gl.domElement.requestPointerLock() as Promise<void> | undefined
+    request?.catch?.(() => {})
+    return () => {
+      live.locked = false
+      document.exitPointerLock()
+    }
+  }, [camera, gl])
 
   useEffect(() => {
     const setKey = (down: boolean) => (e: KeyboardEvent) => {

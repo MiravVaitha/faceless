@@ -2,13 +2,16 @@ import { Suspense, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import Bot from './Bot'
 import Maze from './Maze'
+import Menu from './Menu'
 import Player from './Player'
 import { FOV, PLAYER_HEIGHT } from './config'
 import { PLAYER_SPAWN, cellToWorld } from './map'
+import { useGame } from './store'
 
 const spawn = cellToWorld(PLAYER_SPAWN.col, PLAYER_SPAWN.row)
 
 export default function App() {
+  const phase = useGame((s) => s.phase)
   const [locked, setLocked] = useState(false)
 
   return (
@@ -29,12 +32,16 @@ export default function App() {
         <Suspense fallback={null}>
           <Bot />
         </Suspense>
-        <Player onLockChange={setLocked} />
+        {/* mounted only while playing, so menu/game-over clicks can't grab the pointer */}
+        {phase === 'playing' && <Player onLockChange={setLocked} />}
       </Canvas>
-      {!locked && (
+
+      {phase === 'menu' && <Menu />}
+
+      {phase === 'playing' && !locked && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div className="rounded-lg bg-black/70 px-8 py-6 text-center font-mono text-white">
-            <p className="text-xl">Click to play</p>
+            <p className="text-xl">Click to enter the maze</p>
             <p className="mt-3 text-sm text-white/60">WASD move &middot; Shift sprint &middot; Esc release mouse</p>
           </div>
         </div>

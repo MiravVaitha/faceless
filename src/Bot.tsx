@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Billboard, useTexture } from '@react-three/drei'
 import { DoubleSide, Group, SRGBColorSpace, Vector3 } from 'three'
@@ -7,7 +7,7 @@ import { BOT_FLOAT, BOT_HEIGHT, BOT_RADIUS, BOT_SPEED, PATH_REFRESH, WAYPOINT_RA
 import { live } from './live'
 import { BOT_SPAWN, cellToWorld, worldToCell } from './map'
 import { type Cell, findPath } from './pathfinding'
-import { placeholderFaceUrl } from './placeholderFace'
+import { useGame } from './store'
 
 const spawn = cellToWorld(BOT_SPAWN.col, BOT_SPAWN.row)
 const SPRITE_Y = BOT_HEIGHT / 2 + BOT_FLOAT
@@ -17,7 +17,9 @@ const _target = new Vector3()
 const _dir = new Vector3()
 
 export default function Bot() {
-  const texture = useTexture(placeholderFaceUrl)
+  const faceUrl = useGame((s) => s.faceUrl)
+  const runId = useGame((s) => s.runId)
+  const texture = useTexture(faceUrl)
 
   const group = useRef<Group>(null)
   const pos = useRef(new Vector3(spawn.x, SPRITE_Y, spawn.z))
@@ -25,13 +27,23 @@ export default function Bot() {
   const pathIdx = useRef(0)
   const repathIn = useRef(0)
 
+  // every new run puts the bot back at the far corner
+  useEffect(() => {
+    pos.current.set(spawn.x, SPRITE_Y, spawn.z)
+    path.current = []
+    pathIdx.current = 0
+    repathIn.current = 0
+    live.botDistance = Infinity
+    group.current?.position.copy(pos.current)
+  }, [runId])
+
   useFrame(({ camera }, delta) => {
     const g = group.current
     if (!g) return
     const dt = Math.min(delta, 0.1)
     const p = pos.current
 
-    if (live.locked) {
+    if (useGame.getState().phase === 'playing' && live.locked) {
       // Recompute the route on a timer, not every frame — the staleness is
       // part of the nextbot feel (it overshoots corners you just turned).
       repathIn.current -= dt

@@ -10,3 +10,4 @@ export const AUDIO_REF = 5 // PositionalAudio refDistance
 export const AUDIO_MAX = 40 // PositionalAudio maxDistance
 
 export const PLAYER_HEIGHT = 1.7 // camera eye height, meters
+export const GRAVITY = 25 // m/s² — gamey on purpose, snaps the player to the floor

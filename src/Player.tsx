@@ -4,6 +4,7 @@ import { PointerLockControls } from '@react-three/drei'
 import { Euler, Vector3 } from 'three'
 import { slideMove } from './collision'
 import { GRAVITY, MOUSE_SENS, PLAYER_HEIGHT, PLAYER_RADIUS, PLAYER_SPRINT, PLAYER_WALK } from './config'
+import { live } from './live'
 
 type KeyAction = 'forward' | 'back' | 'left' | 'right' | 'sprint'
 
@@ -105,8 +106,14 @@ export default function Player({ onLockChange }: { onLockChange?: (locked: boole
       ref={controls}
       makeDefault
       pointerSpeed={MOUSE_SENS / 0.002} // three applies 0.002 rad/px internally; scale so MOUSE_SENS is the real sensitivity
-      onLock={() => onLockChange?.(true)}
-      onUnlock={() => onLockChange?.(false)}
+      onLock={() => {
+        live.locked = true
+        onLockChange?.(true)
+      }}
+      onUnlock={() => {
+        live.locked = false
+        onLockChange?.(false)
+      }}
     />
   )
 }

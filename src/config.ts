@@ -6,6 +6,7 @@ export const CATCH_DISTANCE = 1.2 // meters
 export const FOV = 75
 export const MOUSE_SENS = 0.002
 export const PATH_REFRESH = 0.3 // seconds between A* recomputes
+export const WAYPOINT_RADIUS = 0.35 // meters — how close before the bot snaps to the next waypoint
 export const AUDIO_REF = 5 // PositionalAudio refDistance
 export const AUDIO_MAX = 40 // PositionalAudio maxDistance
 

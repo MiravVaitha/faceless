@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
+import Bot from './Bot'
 import Maze from './Maze'
 import Player from './Player'
 import { FOV, PLAYER_HEIGHT } from './config'
@@ -25,6 +26,9 @@ export default function App() {
         <ambientLight intensity={0.4} />
         <directionalLight position={[10, 15, 5]} intensity={1.2} />
         <Maze />
+        <Suspense fallback={null}>
+          <Bot />
+        </Suspense>
         <Player onLockChange={setLocked} />
       </Canvas>
       {!locked && (

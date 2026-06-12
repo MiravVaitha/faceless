@@ -1,11 +1,13 @@
 import { Suspense, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
+import AudioRig from './AudioRig'
 import Bot from './Bot'
 import GameOver from './GameOver'
 import Hud from './Hud'
 import Maze from './Maze'
 import Menu from './Menu'
 import Player from './Player'
+import ShakeRig from './ShakeRig'
 import { FOV, PLAYER_HEIGHT } from './config'
 import { PLAYER_SPAWN, cellToWorld } from './map'
 import { useGame } from './store'
@@ -36,6 +38,9 @@ export default function App() {
         </Suspense>
         {/* mounted only while playing, so menu/game-over clicks can't grab the pointer */}
         {phase === 'playing' && <Player onLockChange={setLocked} />}
+        {/* mounted only once a run exists, so the AudioContext is born inside the Start gesture */}
+        {phase !== 'menu' && <AudioRig />}
+        <ShakeRig />
       </Canvas>
 
       {phase === 'menu' && <Menu />}

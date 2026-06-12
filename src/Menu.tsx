@@ -1,4 +1,5 @@
 import { useRef, type ChangeEvent } from 'react'
+import { resumeAudio } from './audio'
 import { useGame } from './store'
 
 export default function Menu() {
@@ -12,6 +13,12 @@ export default function Menu() {
     const file = e.target.files?.[0]
     if (file) setFace(URL.createObjectURL(file))
     e.target.value = '' // so picking the same file again still fires onChange
+  }
+
+  // the only place audio is allowed to begin: inside the Start click gesture
+  const onStart = () => {
+    resumeAudio()
+    start()
   }
 
   return (
@@ -32,7 +39,7 @@ export default function Menu() {
             UPLOAD FACE
           </button>
           <button
-            onClick={start}
+            onClick={onStart}
             className="border border-red-700 bg-red-800/80 px-8 py-2 text-sm font-bold hover:bg-red-700"
           >
             START

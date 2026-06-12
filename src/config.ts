@@ -24,3 +24,7 @@ export const BOT_FLOAT = 0.12 // hover above the floor, meters
 export const JUMPSCARE_SNAP = 0.06 // seconds to close ~63% of the rush — smaller = more violent
 export const JUMPSCARE_SCALE = 2.4 // how big the face grows during the rush
 export const GAMEOVER_DELAY = 900 // ms between the catch and the game-over panel
+
+export const THREAT_DISTANCE = 24 // meters — vignette/heartbeat/shake ramp in from here down to CATCH_DISTANCE
+export const SHAKE_MAX = 0.035 // meters of camera jitter at threat 1
+export const FOV_PULSE = 4 // degrees of FOV widening at threat 1

@@ -1,9 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Billboard, useTexture } from '@react-three/drei'
-import { DoubleSide, Group, SRGBColorSpace, Vector3 } from 'three'
+import { DoubleSide, Group, type PositionalAudio as ThreePositionalAudio, SRGBColorSpace, Vector3 } from 'three'
+import { footstepsBuffer, getListener } from './audio'
 import { slideMove } from './collision'
 import {
+  AUDIO_MAX,
+  AUDIO_REF,
   BOT_FLOAT,
   BOT_HEIGHT,
   BOT_RADIUS,
@@ -29,7 +32,29 @@ const _dir = new Vector3()
 export default function Bot() {
   const faceUrl = useGame((s) => s.faceUrl)
   const runId = useGame((s) => s.runId)
+  const phase = useGame((s) => s.phase)
   const texture = useTexture(faceUrl)
+  const steps = useRef<ThreePositionalAudio>(null)
+
+  // footsteps/breathing loop, swelling with proximity via the positional
+  // panner (linear falloff from AUDIO_REF to silence at AUDIO_MAX)
+  useEffect(() => {
+    const a = steps.current
+    if (!a || phase !== 'playing') return
+    if (!a.buffer) {
+      a.setBuffer(footstepsBuffer())
+      a.setLoop(true)
+      a.setRefDistance(AUDIO_REF)
+      a.setMaxDistance(AUDIO_MAX)
+      a.setDistanceModel('linear')
+      a.setRolloffFactor(1)
+      a.setVolume(0.9)
+    }
+    a.play()
+    return () => {
+      if (a.isPlaying) a.stop()
+    }
+  }, [phase])
 
   const group = useRef<Group>(null)
   const pos = useRef(new Vector3(spawn.x, SPRITE_Y, spawn.z))
@@ -125,6 +150,8 @@ export default function Bot() {
 
   return (
     <group ref={group} position={[spawn.x, SPRITE_Y, spawn.z]}>
+      {/* only after the first Start, so the AudioContext is born post-gesture */}
+      {phase !== 'menu' && <positionalAudio ref={steps} args={[getListener()]} />}
       <Billboard>
         <mesh>
           <planeGeometry args={[width, BOT_HEIGHT]} />

@@ -63,8 +63,10 @@ export default function Bot() {
   const repathIn = useRef(0)
   const scareT = useRef(0)
 
-  // every new run puts the bot back at the far corner
+  // every new run — or a return to the menu — puts the bot back at the far
+  // corner; during 'caught' it stays put so the jumpscare pose holds
   useEffect(() => {
+    if (phase === 'caught') return
     pos.current.set(spawn.x, SPRITE_Y, spawn.z)
     path.current = []
     pathIdx.current = 0
@@ -73,7 +75,7 @@ export default function Bot() {
     live.botDistance = Infinity
     group.current?.position.copy(pos.current)
     group.current?.scale.setScalar(1)
-  }, [runId])
+  }, [runId, phase])
 
   useFrame(({ camera }, delta) => {
     const g = group.current

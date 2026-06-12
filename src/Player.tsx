@@ -2,7 +2,8 @@ import { useEffect, useRef, type ComponentRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { PointerLockControls } from '@react-three/drei'
 import { Euler, Vector3 } from 'three'
-import { GRAVITY, MOUSE_SENS, PLAYER_HEIGHT, PLAYER_SPRINT, PLAYER_WALK } from './config'
+import { slideMove } from './collision'
+import { GRAVITY, MOUSE_SENS, PLAYER_HEIGHT, PLAYER_RADIUS, PLAYER_SPRINT, PLAYER_WALK } from './config'
 
 type KeyAction = 'forward' | 'back' | 'left' | 'right' | 'sprint'
 
@@ -88,7 +89,15 @@ export default function Player({ onLockChange }: { onLockChange?: (locked: boole
       .normalize() // diagonals move at the same speed as straight lines
 
     const speed = k.sprint ? PLAYER_SPRINT : PLAYER_WALK
-    camera.position.addScaledVector(_move, speed * dt)
+    const [nx, nz] = slideMove(
+      camera.position.x,
+      camera.position.z,
+      _move.x * speed * dt,
+      _move.z * speed * dt,
+      PLAYER_RADIUS,
+    )
+    camera.position.x = nx
+    camera.position.z = nz
   })
 
   return (

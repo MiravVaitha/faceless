@@ -11,3 +11,7 @@ export const AUDIO_MAX = 40 // PositionalAudio maxDistance
 
 export const PLAYER_HEIGHT = 1.7 // camera eye height, meters
 export const GRAVITY = 25 // m/s² — gamey on purpose, snaps the player to the floor
+export const PLAYER_RADIUS = 0.35 // collision half-width, meters
+
+export const CELL_SIZE = 4 // maze cell, meters — corridors are one cell wide
+export const WALL_HEIGHT = 4 // meters — tall enough that you can't see over

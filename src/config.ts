@@ -40,3 +40,26 @@ export const GAMEOVER_DELAY = 900 // ms between the catch and the game-over pane
 export const THREAT_DISTANCE = 24 // meters — vignette/heartbeat/shake ramp in from here down to CATCH_DISTANCE
 export const SHAKE_MAX = 0.035 // meters of camera jitter at threat 1
 export const FOV_PULSE = 4 // degrees of FOV widening at threat 1
+
+// ── City / night atmosphere ─────────────────────────────────────────────────
+// The collision + pathfinding grid in map.ts is unchanged: every '#' is a
+// building, every '.' a street. These knobs only drive how the city LOOKS, so
+// tweak them freely. Building height is independent of collision (which is 2D,
+// footprint-only), so towers can loom without changing where you can walk.
+export const BUILDING_TIERS = [6, 11, 17, 26] // building heights, meters: low shop → tower
+export const FACADE_VARIANTS = 5 // distinct window/wall palettes, assigned per building
+export const WINDOW_PITCH_V = 3.0 // meters per window row (one storey) — keeps windows uniform across heights
+
+export const LAMP_COUNT = 34 // streetlights; spaced out (see Maze) so every street gets pools of light
+export const LAMP_SPACING = 9 // meters — minimum gap between lamps when distributing them
+export const LAMP_HEIGHT = 4.6 // meters
+export const LAMP_LIGHT_INTENSITY = 42 // raise for brighter streets, lower for moodier dark
+export const LAMP_LIGHT_DISTANCE = 24 // meters until the light falls to zero
+export const LAMP_GLOW_RADIUS = 7.5 // ground light-pool radius, meters
+
+export const SHOPFRONT_OPEN_CHANCE = 0.7 // fraction of street-level bays that are a lit shop (rest shuttered)
+
+// Night fog: lifted off pure black to a dark blue so distance reads as haze,
+// not a wall. NEAR pushed back so the near street stays clear and navigable.
+export const FOG_NEAR = 14 // meters
+export const FOG_FAR = 66

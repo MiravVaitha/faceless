@@ -29,18 +29,22 @@ export default function App() {
         }}
       >
         <color attach="background" args={['#0a0a12']} />
-        <fog attach="fog" args={['#0a0a12', 10, 45]} />
-        <ambientLight intensity={0.4} />
-        <directionalLight position={[10, 15, 5]} intensity={1.2} />
-        <Maze />
-        <Suspense fallback={null}>
-          <Bot />
-        </Suspense>
+        <fog attach="fog" args={['#0a0a12', 12, 48]} />
+        {/* nextbot maps are bright and readable: hemisphere fills the faces a
+            single directional would leave pitch black; fog does the menace */}
+        <ambientLight intensity={0.5} />
+        <hemisphereLight args={['#9aa7bd', '#46503e', 1.0]} />
+        <directionalLight position={[60, 80, 30]} intensity={0.7} />
+        <ShakeRig>
+          <Maze />
+          <Suspense fallback={null}>
+            <Bot />
+          </Suspense>
+        </ShakeRig>
         {/* mounted only while playing, so menu/game-over clicks can't grab the pointer */}
         {phase === 'playing' && <Player onLockChange={setLocked} />}
         {/* mounted only once a run exists, so the AudioContext is born inside the Start gesture */}
         {phase !== 'menu' && <AudioRig />}
-        <ShakeRig />
       </Canvas>
 
       {phase === 'menu' && <Menu />}

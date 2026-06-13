@@ -32,7 +32,7 @@ export default function Maze() {
       matrix.setPosition(x, WALL_HEIGHT / 2, z)
       mesh.setMatrixAt(i, matrix)
       // slight per-wall tint variation breaks up the corridors visually
-      color.set('#5d635a').multiplyScalar(0.88 + 0.24 * hash01(col * 127.1 + row * 311.7))
+      color.set('#7b8275').multiplyScalar(0.88 + 0.24 * hash01(col * 127.1 + row * 311.7))
       mesh.setColorAt(i, color)
     })
     mesh.instanceMatrix.needsUpdate = true
@@ -49,7 +49,7 @@ export default function Maze() {
       </instancedMesh>
       <mesh position={[MAP_WIDTH / 2, 0, MAP_DEPTH / 2]} rotation-x={-Math.PI / 2}>
         <planeGeometry args={[MAP_WIDTH, MAP_DEPTH]} />
-        <meshStandardMaterial color="#4a5240" />
+        <meshStandardMaterial color="#5a6350" />
       </mesh>
     </group>
   )

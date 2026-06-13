@@ -18,7 +18,6 @@ interface GameState {
   faceUrl: string
   /** Bumped on every run start; effects keyed on it reset positions. */
   runId: number
-  startedAt: number
   survivedMs: number
   bestMs: number | null
   setFace: (url: string) => void
@@ -31,7 +30,6 @@ export const useGame = create<GameState>((set, get) => ({
   phase: 'menu',
   faceUrl: placeholderFaceUrl,
   runId: 0,
-  startedAt: 0,
   survivedMs: 0,
   bestMs: loadBest(),
 
@@ -42,13 +40,11 @@ export const useGame = create<GameState>((set, get) => ({
     set({ faceUrl: url })
   },
 
-  start: () =>
-    set((s) => ({
-      phase: 'playing',
-      runId: s.runId + 1,
-      startedAt: performance.now(),
-      survivedMs: 0,
-    })),
+  start: () => {
+    live.runTimeMs = 0 // the run clock; Player accumulates into it while active
+    live.active = false
+    set((s) => ({ phase: 'playing', runId: s.runId + 1, survivedMs: 0 }))
+  },
 
   caught: () => {
     const s = get()
@@ -62,11 +58,7 @@ export const useGame = create<GameState>((set, get) => ({
   toMenu: () => set({ phase: 'menu' }),
 }))
 
-/** Run time excluding pointer-unlocked spans (the game is frozen then). */
+/** Accumulated active play time this run (frozen while paused / not active). */
 export function runElapsedMs(): number {
-  const { phase, startedAt } = useGame.getState()
-  if (phase === 'menu') return 0
-  const now = performance.now()
-  const paused = live.pausedTotal + (live.pausedAt !== null ? now - live.pausedAt : 0)
-  return Math.max(0, now - startedAt - paused)
+  return useGame.getState().phase === 'menu' ? 0 : live.runTimeMs
 }

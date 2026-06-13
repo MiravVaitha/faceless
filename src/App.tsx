@@ -1,4 +1,4 @@
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import AudioRig from './AudioRig'
 import Bot from './Bot'
@@ -17,6 +17,21 @@ const spawn = cellToWorld(PLAYER_SPAWN.col, PLAYER_SPAWN.row)
 export default function App() {
   const phase = useGame((s) => s.phase)
   const [locked, setLocked] = useState(false)
+  const [hasPad, setHasPad] = useState(false)
+
+  // a controller plays without pointer lock, so its presence hides the
+  // click-to-enter prompt. Chrome only reports a pad after its first button
+  // press (privacy), which is exactly when the player has "entered" anyway.
+  useEffect(() => {
+    const update = () => setHasPad((navigator.getGamepads?.() ?? []).some((p) => !!p?.connected))
+    window.addEventListener('gamepadconnected', update)
+    window.addEventListener('gamepaddisconnected', update)
+    update()
+    return () => {
+      window.removeEventListener('gamepadconnected', update)
+      window.removeEventListener('gamepaddisconnected', update)
+    }
+  }, [])
 
   return (
     <div className="relative h-full w-full">
@@ -51,11 +66,14 @@ export default function App() {
 
       {phase === 'playing' && <Hud />}
 
-      {phase === 'playing' && !locked && (
+      {phase === 'playing' && !locked && !hasPad && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div className="rounded-lg bg-black/70 px-8 py-6 text-center font-mono text-white">
             <p className="text-xl">Click to enter the maze</p>
-            <p className="mt-3 text-sm text-white/60">WASD move &middot; Shift sprint &middot; Esc release mouse</p>
+            <p className="mt-1 text-sm text-white/50">(or press a button on your controller)</p>
+            <p className="mt-3 text-sm text-white/60">
+              WASD move &middot; Shift sprint &middot; Space jump &middot; Esc release mouse
+            </p>
           </div>
         </div>
       )}

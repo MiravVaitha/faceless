@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { GAMEOVER_DELAY } from './config'
+import { pollConfirmPressed } from './gamepad'
 import { useGame } from './store'
 
 const fmt = (ms: number) => `${(ms / 1000).toFixed(1)}s`
@@ -16,6 +17,19 @@ export default function GameOver() {
     const t = setTimeout(() => setVisible(true), GAMEOVER_DELAY)
     return () => clearTimeout(t)
   }, [])
+
+  // A / Start on the gamepad runs again — only once the panel is up, so a held
+  // jump button at the moment of the catch can't instantly restart
+  useEffect(() => {
+    if (!visible) return
+    let raf = 0
+    const tick = () => {
+      if (pollConfirmPressed()) start()
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [visible, start])
 
   if (!visible) return null
 
@@ -44,6 +58,7 @@ export default function GameOver() {
             CHANGE FACE
           </button>
         </div>
+        <p className="text-xs text-white/30">press A to run again</p>
       </div>
     </div>
   )

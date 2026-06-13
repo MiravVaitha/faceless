@@ -100,7 +100,7 @@ export default function Bot() {
       return
     }
 
-    if (phase === 'playing' && live.locked) {
+    if (phase === 'playing' && live.active) {
       // Recompute the route on a timer, not every frame — the staleness is
       // part of the nextbot feel (it overshoots corners you just turned).
       repathIn.current -= dt
@@ -140,15 +140,16 @@ export default function Bot() {
     g.position.copy(p)
     live.botDistance = Math.hypot(camera.position.x - p.x, camera.position.z - p.z)
 
-    if (phase === 'playing' && live.locked && live.botDistance < CATCH_DISTANCE) {
+    if (phase === 'playing' && live.active && live.botDistance < CATCH_DISTANCE) {
       useGame.getState().caught()
     }
   })
 
-  // size the sprite like a person regardless of the photo's shape
+  // size the sprite from the photo's aspect, clamped relative to its height so
+  // any image stays a believable looming figure rather than a sliver or a slab
   const img = texture.image as { width?: number; height?: number } | undefined
   const aspect = img?.width && img?.height ? img.width / img.height : 1
-  const width = Math.min(Math.max(BOT_HEIGHT * aspect, 1.0), 2.6)
+  const width = Math.min(Math.max(BOT_HEIGHT * aspect, BOT_HEIGHT * 0.5), BOT_HEIGHT * 1.5)
 
   return (
     <group ref={group} position={[spawn.x, SPRITE_Y, spawn.z]}>

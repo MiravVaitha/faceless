@@ -22,7 +22,7 @@ export default function ShakeRig({ children }: { children: ReactNode }) {
 
     const g = world.current
     if (g) {
-      if (useGame.getState().phase === 'playing' && live.locked && t > 0) {
+      if (useGame.getState().phase === 'playing' && live.active && t > 0) {
         const amp = SHAKE_MAX * t * t
         const time = clock.elapsedTime
         g.position.set(

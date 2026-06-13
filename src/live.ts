@@ -1,16 +1,16 @@
 import { CATCH_DISTANCE, THREAT_DISTANCE } from './config'
 
 // Per-frame values shared across the canvas/DOM boundary without re-renders.
-// Written inside useFrame (or lock callbacks), read by DOM overlays via
-// requestAnimationFrame. Discrete game state belongs in the zustand store,
-// not here.
+// Written inside useFrame, read by DOM overlays via requestAnimationFrame.
+// Discrete game state belongs in the zustand store, not here.
 export const live = {
-  locked: false,
+  locked: false, // pointer lock — mouse look + keyboard play
+  gamepad: false, // a gamepad is connected and feeding input
+  active: false, // accepting play input this frame: locked || gamepad. The bot,
+  // the run clock, and the juice all gate on this so a controller (which can't
+  // pointer-lock by clicking) plays exactly like mouse + keyboard.
   botDistance: Infinity,
-  // pause bookkeeping: survival time only counts while the pointer is locked,
-  // since the bot freezes when it isn't — otherwise Esc-idling farms the clock
-  pausedAt: null as number | null,
-  pausedTotal: 0,
+  runTimeMs: 0, // play time accumulated while active, reset each run
 }
 
 /** 0 when the bot is THREAT_DISTANCE+ away, 1 at touching distance. */
